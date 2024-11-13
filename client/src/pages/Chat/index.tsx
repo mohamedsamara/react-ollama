@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import { Button, Loading } from 'react-daisyui'
+import { IoSend } from 'react-icons/io5'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -93,7 +95,7 @@ const Chat = () => {
 
   return (
     <div>
-      <h2>Chat Messages</h2>
+      <h1 className="text-4xl font-bold text-blue-500">Chat Messages</h1>
       <div>
         {messages.map((msg, index) => (
           <div key={index}>{msg.text}</div>
@@ -106,9 +108,11 @@ const Chat = () => {
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message"
         />
-        <button type="submit" disabled={isSending}>
-          {isSending ? 'Sending...' : 'Send'}
-        </button>
+        <button type="submit" disabled={isSending}></button>
+
+        <Button type="submit" size="sm" shape="circle" disabled={isSending}>
+          {isSending ? <Loading size="xs" /> : <IoSend />}
+        </Button>
       </form>
     </div>
   )
