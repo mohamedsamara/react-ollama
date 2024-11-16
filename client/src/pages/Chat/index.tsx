@@ -1,21 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
-import { Button, Loading } from 'react-daisyui'
-import { IoSend } from 'react-icons/io5'
 
-const apiUrl = import.meta.env.VITE_API_URL
+import { ChatTypes } from '@lib/types'
+import { API_URL } from '@lib/constants'
+import { ChatHeader, ChatFooter, MsgList } from './components'
 
 const Chat = () => {
-  const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<
-    Array<{ text: string; type: string }>
-  >([]) // Array of objects for user and chatgpt messages
+  const [messages, setMessages] = useState<ChatTypes.Msg[]>([])
   const [isSending, setIsSending] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
 
   const streamChat = () => {
     if (eventSourceRef.current) eventSourceRef.current.close()
 
-    const eventSource = new EventSource(`${apiUrl}/conversation`)
+    const eventSource = new EventSource(`${API_URL}/conversation`)
     eventSourceRef.current = eventSource
 
     eventSource.onopen = () => {
@@ -35,12 +32,12 @@ const Chat = () => {
           // If the last message is from the bot, append to its text
           if (
             updatedMessages.length > 0 &&
-            updatedMessages[updatedMessages.length - 1].type === 'bot'
+            updatedMessages[updatedMessages.length - 1].role === 'bot'
           ) {
             updatedMessages[updatedMessages.length - 1].text += data.message
           } else {
             // Otherwise, add a new bot message entry
-            updatedMessages.push({ text: data.message, type: 'bot' })
+            updatedMessages.push({ text: data.message, role: 'bot' })
           }
           return updatedMessages
         })
@@ -58,21 +55,15 @@ const Chat = () => {
     }
   }, [])
 
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!message.trim()) return
-
+  const sendMessage = async (message: string) => {
+    setIsSending(true)
     // Add user message to the messages array
     setMessages((prevMessages) => [
       ...prevMessages,
-      { text: message, type: 'user' }, // Add user message to state
+      { text: message, role: 'user' },
     ])
-
-    setIsSending(true)
-
     try {
-      const response = await fetch(`${apiUrl}/conversation`, {
+      const response = await fetch(`${API_URL}/conversation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +75,6 @@ const Chat = () => {
         throw new Error('Failed to send message')
       }
 
-      setMessage('')
       streamChat()
     } catch (error) {
       console.error('Error sending message:', error)
@@ -94,26 +84,16 @@ const Chat = () => {
   }
 
   return (
-    <div>
-      <h1 className="text-4xl font-bold text-blue-500">Chat Messages</h1>
-      <div>
-        {messages.map((msg, index) => (
-          <div key={index}>{msg.text}</div>
-        ))}
+    <div className="relative flex flex-col h-screen w-full sm:max-w-[768px] mx-auto">
+      <div className="flex-shrink-0">
+        <ChatHeader />
       </div>
-      <form onSubmit={sendMessage}>
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message"
-        />
-        <button type="submit" disabled={isSending}></button>
-
-        <Button type="submit" size="sm" shape="circle" disabled={isSending}>
-          {isSending ? <Loading size="xs" /> : <IoSend />}
-        </Button>
-      </form>
+      <div className="flex-1 space-y-4 py-6 px-4 overflow-y-auto no-scrollbar">
+        <MsgList messages={messages} />
+      </div>
+      <div className="flex-shrink-0">
+        <ChatFooter sendMessage={sendMessage} isSending={isSending} />
+      </div>
     </div>
   )
 }
