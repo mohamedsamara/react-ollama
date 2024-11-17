@@ -24,7 +24,11 @@ app.use(
 app.use(express.json());
 
 app.get("/api/health", (req: Request, res: Response) => {
-  res.json({ success: true, message: "Everything runs fine!" });
+  res.json({
+    success: true,
+    message: "Service is healthy and running.",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.post("/api/conversation", (req: Request, res: Response) => {

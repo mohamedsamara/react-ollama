@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Button, Loading } from 'react-daisyui'
+import { Button } from 'react-daisyui'
 import { IoSend } from 'react-icons/io5'
 import { FaStop } from 'react-icons/fa'
 
