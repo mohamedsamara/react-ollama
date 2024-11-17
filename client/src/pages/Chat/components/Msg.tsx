@@ -16,6 +16,7 @@ const Msg = ({ msg }: { msg: ChatTypes.Msg }) => {
 
   return (
     <Markdown
+      className="max-w-full break-words whitespace-pre-wrap"
       remarkPlugins={[RemarkGfm]}
       components={{
         code: ({ node, className, children, ...props }) => {
@@ -52,10 +53,7 @@ export default Msg
 
 const CustomCodeBlock = ({ children }: { children: ReactNode }) => {
   return (
-    <pre
-      className="bg-slate-100 p-4 rounded-md"
-      //   style={{ backgroundColor: '#ccc', padding: '1em', borderRadius: '5px' }}
-    >
+    <pre className="p-4 overflow-x-auto rounded-md bg-slate-100">
       <code>{children}</code>
     </pre>
   )
