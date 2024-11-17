@@ -6,7 +6,7 @@ import { ChatHeader, ChatFooter, MsgList } from './components'
 
 const Chat = () => {
   const [messages, setMessages] = useState<ChatTypes.Msg[]>([])
-  const [isSending, setIsSending] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
 
   const streamChat = () => {
@@ -17,6 +17,7 @@ const Chat = () => {
 
     eventSource.onopen = () => {
       console.log('>>> Connection opened!')
+      if (!isStreaming) setIsStreaming(true)
     }
 
     eventSource.onmessage = (e) => {
@@ -24,6 +25,7 @@ const Chat = () => {
       if (data.complete) {
         console.log('Stream completed')
         eventSource.close() // Close EventSource to stop reconnection attempts
+        setIsStreaming(false)
         console.log('>>> Stream closed by the server')
       } else {
         // Append the incoming message part to the last bot message
@@ -49,6 +51,12 @@ const Chat = () => {
     }
   }
 
+  const stopStreaming = () => {
+    if (eventSourceRef.current) eventSourceRef.current.close()
+    setIsStreaming(false)
+    console.log('Close EventSource')
+  }
+
   useEffect(() => {
     return () => {
       if (eventSourceRef.current) eventSourceRef.current.close()
@@ -56,7 +64,6 @@ const Chat = () => {
   }, [])
 
   const sendMessage = async (message: string) => {
-    setIsSending(true)
     // Add user message to the messages array
     setMessages((prevMessages) => [
       ...prevMessages,
@@ -78,8 +85,6 @@ const Chat = () => {
       streamChat()
     } catch (error) {
       console.error('Error sending message:', error)
-    } finally {
-      setIsSending(false)
     }
   }
 
@@ -92,7 +97,11 @@ const Chat = () => {
         <MsgList messages={messages} />
       </div>
       <div className="flex-shrink-0">
-        <ChatFooter sendMessage={sendMessage} isSending={isSending} />
+        <ChatFooter
+          sendMessage={sendMessage}
+          stopStreaming={stopStreaming}
+          isStreaming={isStreaming}
+        />
       </div>
     </div>
   )

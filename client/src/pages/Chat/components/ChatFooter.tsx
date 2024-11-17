@@ -1,21 +1,25 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button, Loading } from 'react-daisyui'
 import { IoSend } from 'react-icons/io5'
+import { FaStop } from 'react-icons/fa'
 
 const MAX_ROWS = 20
 
 const ChatFooter = ({
   sendMessage,
-  isSending,
+  stopStreaming,
+  isStreaming,
 }: {
   sendMessage: (msg: string) => void
-  isSending: boolean
+  stopStreaming: () => void
+  isStreaming: boolean
 }) => {
   const [message, setMessage] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isStreaming) return stopStreaming()
 
     if (!message.trim()) return
     sendMessage(message)
@@ -66,16 +70,28 @@ const ChatFooter = ({
           className="self-end p-3 pr-12 resize-none w-full text-slate-700 bg-slate-200 focus:outline-none placeholder:text-slate-800 rounded-md"
         />
         <div className="absolute right-3 bottom-2 flex items-center">
-          <Button
-            type="submit"
-            color="primary"
-            size="sm"
-            shape="circle"
-            disabled={!message.trim() || isSending}
-            className="mt-2"
-          >
-            {isSending ? <Loading size="xs" /> : <IoSend />}
-          </Button>
+          {isStreaming ? (
+            <Button
+              type="submit"
+              color="primary"
+              size="sm"
+              shape="circle"
+              className="mt-2"
+            >
+              <FaStop />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              color="primary"
+              size="sm"
+              shape="circle"
+              disabled={!message.trim()}
+              className="mt-2"
+            >
+              <IoSend />
+            </Button>
+          )}
         </div>
       </div>
     </form>
