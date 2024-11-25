@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/mohamedsamara/react-ollama#readme",
   "devDependencies": {
-    "@types/cors": "^2.8.17",
     "concurrently": "^7.0.0"
   }
 }
